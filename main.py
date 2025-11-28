@@ -26,6 +26,7 @@ from src.ensemble import train_ensemble, weighted_average_predictions, optimize_
 from src.deep_learning import (
     HAS_TORCH,
     build_nn_model,
+    build_transformer_nn_model,
     evaluate_nn_model,
     predict_nn_model,
     train_nn_model,
@@ -43,6 +44,13 @@ def parse_args():
     parser.add_argument('--original', help='Path to original loan data CSV file (optional)')
     parser.add_argument('--output', default='predictions.csv', help='Output file for predictions')
     parser.add_argument('--use-nn', action='store_true', help='Include neural network models')
+    parser.add_argument(
+        '--nn-models',
+        nargs='+',
+        default=['feedforward'],
+        choices=['feedforward', 'transformer'],
+        help='Neural network architectures to train when --use-nn is set'
+    )
     parser.add_argument('--ensemble', choices=['voting', 'stacking', 'weighted', 'none'],
                        default='voting', help='Ensemble method to use')
     parser.add_argument('--val-size', type=float, default=0.2, help='Validation set size ratio')
@@ -87,29 +95,38 @@ def main():
     print("\n[4/5] Training and evaluating models...")
     results = train_and_evaluate_all(X_tr, y_tr, X_val, y_val, use_optimized=True)
 
-    # Try neural network if requested
-    nn_model = None
+    nn_result_names = set()
+
+    # Try neural networks if requested
     if args.use_nn:
         if not HAS_TORCH:
-            print("  PyTorch not available, skipping neural network")
+            print("  PyTorch not available, skipping neural networks")
         else:
-            try:
-                print("\nTraining Neural Network (PyTorch)...")
-                nn_model = build_nn_model(X_tr.shape[1])
-                nn_model, history = train_nn_model(
-                    nn_model,
-                    X_tr.values,
-                    y_tr.values,
-                    X_val.values,
-                    y_val.values,
-                    epochs=50,
-                    batch_size=64,
-                )
-                nn_metrics = evaluate_nn_model(nn_model, X_val.values, y_val.values)
-                results['neural_network'] = (nn_model, nn_metrics)
-                print(f"  Neural Network: Accuracy={nn_metrics['accuracy']:.4f}, F1={nn_metrics['f1']:.4f}")
-            except Exception as e:
-                print(f"  Neural network training failed: {e}")
+            nn_builders = {
+                'feedforward': build_nn_model,
+                'transformer': build_transformer_nn_model,
+            }
+            for nn_type in dict.fromkeys(args.nn_models):
+                builder = nn_builders[nn_type]
+                nn_name = f"nn_{nn_type}"
+                try:
+                    print(f"\nTraining Neural Network ({nn_type})...")
+                    nn_model = builder(X_tr.shape[1])
+                    nn_model, _ = train_nn_model(
+                        nn_model,
+                        X_tr.values,
+                        y_tr.values,
+                        X_val.values,
+                        y_val.values,
+                        epochs=50,
+                        batch_size=64,
+                    )
+                    nn_metrics = evaluate_nn_model(nn_model, X_val.values, y_val.values)
+                    results[nn_name] = (nn_model, nn_metrics)
+                    nn_result_names.add(nn_name)
+                    print(f"  {nn_name}: Accuracy={nn_metrics['accuracy']:.4f}, F1={nn_metrics['f1']:.4f}")
+                except Exception as e:
+                    print(f"  {nn_type} neural network training failed: {e}")
 
     # Print comparison table
     print("\n" + "=" * 60)
@@ -153,10 +170,12 @@ def main():
         predictions_list = []
         model_names = []
         for name, (model, _) in results.items():
-            if name != 'neural_network':
+            if name in nn_result_names:
+                prob = predict_nn_model(model, X_val.values)
+            else:
                 prob = model.predict_proba(X_val)[:, 1]
-                predictions_list.append(prob)
-                model_names.append(name)
+            predictions_list.append(prob)
+            model_names.append(name)
 
         # Optimize weights
         optimal_weights = optimize_ensemble_weights(predictions_list, y_val, metric='f1')
@@ -166,7 +185,10 @@ def main():
         test_predictions_list = []
         for name in model_names:
             model = results[name][0]
-            prob = model.predict_proba(X_test)[:, 1]
+            if name in nn_result_names:
+                prob = predict_nn_model(model, X_test.values)
+            else:
+                prob = model.predict_proba(X_test)[:, 1]
             test_predictions_list.append(prob)
 
         probabilities = weighted_average_predictions(test_predictions_list, optimal_weights)
@@ -174,8 +196,9 @@ def main():
 
     else:  # none - use best model
         print(f"Using best model ({best_name}) for predictions...")
-        if best_name == 'neural_network' and nn_model is not None:
-            probabilities = predict_nn_model(nn_model, X_test.values)
+        if best_name in nn_result_names:
+            nn_model_for_pred = results[best_name][0]
+            probabilities = predict_nn_model(nn_model_for_pred, X_test.values)
             predictions = (probabilities > 0.5).astype(int)
         else:
             predictions = best_model.predict(X_test)
