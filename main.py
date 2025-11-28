@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 """
 Main script for loan prediction using multiple ML and DL methods.
+使用多种机器学习和深度学习方法进行贷款预测的主脚本。
 
-Usage:
+Usage / 使用方法:
     python main.py --train data/train.csv --test data/test.csv [--original data/original.csv]
 """
 
@@ -13,10 +14,10 @@ import warnings
 import pandas as pd
 import numpy as np
 
-# Suppress warnings for cleaner output
+# Suppress warnings for cleaner output / 抑制警告以获得更清晰的输出
 warnings.filterwarnings('ignore')
 
-# Add src to path
+# Add src to path / 将 src 添加到路径
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from src.data_preprocessing import load_data, preprocess_data, get_train_val_split
@@ -25,7 +26,10 @@ from src.ensemble import train_ensemble, weighted_average_predictions, optimize_
 
 
 def parse_args():
-    """Parse command line arguments."""
+    """
+    Parse command line arguments.
+    解析命令行参数。
+    """
     parser = argparse.ArgumentParser(description='Loan Prediction Model Training')
     parser.add_argument('--train', required=True, help='Path to training CSV file')
     parser.add_argument('--test', required=True, help='Path to test CSV file')
@@ -39,7 +43,10 @@ def parse_args():
 
 
 def main():
-    """Main function to run the loan prediction pipeline."""
+    """
+    Main function to run the loan prediction pipeline.
+    运行贷款预测流程的主函数。
+    """
     args = parse_args()
 
     print("=" * 60)

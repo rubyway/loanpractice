@@ -1,5 +1,6 @@
 """
 Deep learning models for loan prediction using TensorFlow/Keras.
+使用 TensorFlow/Keras 进行贷款预测的深度学习模型。
 """
 
 import numpy as np
@@ -19,35 +20,36 @@ except ImportError:
 def build_nn_model(input_dim, hidden_layers=[128, 64, 32], dropout_rate=0.3):
     """
     Build a neural network model for binary classification.
+    构建用于二分类的神经网络模型。
 
-    Args:
-        input_dim: Number of input features
-        hidden_layers: List of hidden layer sizes
-        dropout_rate: Dropout rate for regularization
+    Args / 参数:
+        input_dim: Number of input features / 输入特征数量
+        hidden_layers: List of hidden layer sizes / 隐藏层大小列表
+        dropout_rate: Dropout rate for regularization / 用于正则化的 Dropout 率
 
-    Returns:
-        Compiled Keras model
+    Returns / 返回:
+        Compiled Keras model / 编译后的 Keras 模型
     """
     if not HAS_TENSORFLOW:
         raise ImportError("TensorFlow is required for neural network models")
 
     model = Sequential()
 
-    # Input layer
+    # Input layer / 输入层
     model.add(Dense(hidden_layers[0], input_dim=input_dim, activation='relu'))
     model.add(BatchNormalization())
     model.add(Dropout(dropout_rate))
 
-    # Hidden layers
+    # Hidden layers / 隐藏层
     for units in hidden_layers[1:]:
         model.add(Dense(units, activation='relu'))
         model.add(BatchNormalization())
         model.add(Dropout(dropout_rate))
 
-    # Output layer
+    # Output layer / 输出层
     model.add(Dense(1, activation='sigmoid'))
 
-    # Compile model
+    # Compile model / 编译模型
     model.compile(
         optimizer=Adam(learning_rate=0.001),
         loss='binary_crossentropy',
@@ -61,19 +63,20 @@ def train_nn_model(model, X_train, y_train, X_val=None, y_val=None,
                    epochs=100, batch_size=32, patience=10):
     """
     Train the neural network model.
+    训练神经网络模型。
 
-    Args:
-        model: Keras model
-        X_train: Training features
-        y_train: Training target
-        X_val: Validation features (optional)
-        y_val: Validation target (optional)
-        epochs: Maximum number of epochs
-        batch_size: Batch size for training
-        patience: Early stopping patience
+    Args / 参数:
+        model: Keras model / Keras 模型
+        X_train: Training features / 训练特征
+        y_train: Training target / 训练目标
+        X_val: Validation features (optional) / 验证特征（可选）
+        y_val: Validation target (optional) / 验证目标（可选）
+        epochs: Maximum number of epochs / 最大训练轮数
+        batch_size: Batch size for training / 训练批次大小
+        patience: Early stopping patience / 早停耐心值
 
-    Returns:
-        Trained model and training history
+    Returns / 返回:
+        Trained model and training history / 已训练的模型和训练历史
     """
     callbacks = [
         EarlyStopping(
@@ -106,18 +109,19 @@ def train_nn_model(model, X_train, y_train, X_val=None, y_val=None,
 def evaluate_nn_model(model, X, y):
     """
     Evaluate neural network model.
+    评估神经网络模型。
 
-    Args:
-        model: Trained Keras model
-        X: Features
-        y: Target
+    Args / 参数:
+        model: Trained Keras model / 已训练的 Keras 模型
+        X: Features / 特征
+        y: Target / 目标
 
-    Returns:
-        Dictionary of metrics
+    Returns / 返回:
+        Dictionary of metrics / 指标字典
     """
     from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 
-    # Get predictions
+    # Get predictions / 获取预测
     y_prob = model.predict(X, verbose=0).flatten()
     y_pred = (y_prob > 0.5).astype(int)
 
@@ -135,12 +139,13 @@ def evaluate_nn_model(model, X, y):
 def build_deep_nn_model(input_dim):
     """
     Build a deeper neural network for more complex patterns.
+    构建更深的神经网络以处理更复杂的模式。
 
-    Args:
-        input_dim: Number of input features
+    Args / 参数:
+        input_dim: Number of input features / 输入特征数量
 
-    Returns:
-        Compiled Keras model
+    Returns / 返回:
+        Compiled Keras model / 编译后的 Keras 模型
     """
     if not HAS_TENSORFLOW:
         raise ImportError("TensorFlow is required for neural network models")
