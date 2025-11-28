@@ -7,7 +7,7 @@ This project implements multiple machine learning and deep learning models to pr
 ## Features / 功能特性
 
 - **Multiple ML Models / 多种机器学习模型**: Logistic Regression, Random Forest, Gradient Boosting, XGBoost, LightGBM, CatBoost / 逻辑回归、随机森林、梯度提升、XGBoost、LightGBM、CatBoost
-- **Deep Learning / 深度学习**: Neural network models using TensorFlow/Keras / 使用 TensorFlow/Keras 的神经网络模型
+- **Deep Learning / 深度学习**: Neural network models using PyTorch / 使用 PyTorch 的神经网络模型
 - **Ensemble Methods / 集成方法**: Voting, Stacking, and Weighted Average ensembles / 投票、堆叠和加权平均集成
 - **Automated Preprocessing / 自动预处理**: Handles missing values, categorical encoding, and feature scaling / 处理缺失值、分类编码和特征缩放
 
@@ -106,7 +106,7 @@ loanpractice/
 - **CatBoost**: Handles categorical features well / 良好处理分类特征
 
 ### Deep Learning / 深度学习
-- **Neural Network / 神经网络**: Multi-layer perceptron with dropout and batch normalization / 带 dropout 和批归一化的多层感知器
+- **Neural Network / 神经网络**: PyTorch-based multilayer perceptron with dropout and batch normalization / 基于 PyTorch 的带 dropout 和批归一化的多层感知器
 
 ### Ensemble Methods / 集成方法
 - **Voting / 投票**: Combines predictions via majority vote or probability averaging / 通过多数投票或概率平均组合预测

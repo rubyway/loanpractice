@@ -23,6 +23,13 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from src.data_preprocessing import load_data, preprocess_data, get_train_val_split
 from src.models import train_and_evaluate_all, get_best_model
 from src.ensemble import train_ensemble, weighted_average_predictions, optimize_ensemble_weights
+from src.deep_learning import (
+    HAS_TORCH,
+    build_nn_model,
+    evaluate_nn_model,
+    predict_nn_model,
+    train_nn_model,
+)
 
 
 def parse_args():
@@ -83,24 +90,26 @@ def main():
     # Try neural network if requested
     nn_model = None
     if args.use_nn:
-        try:
-            from src.deep_learning import build_nn_model, train_nn_model, evaluate_nn_model, HAS_TENSORFLOW
-
-            if HAS_TENSORFLOW:
-                print("\nTraining Neural Network...")
+        if not HAS_TORCH:
+            print("  PyTorch not available, skipping neural network")
+        else:
+            try:
+                print("\nTraining Neural Network (PyTorch)...")
                 nn_model = build_nn_model(X_tr.shape[1])
                 nn_model, history = train_nn_model(
-                    nn_model, X_tr.values, y_tr.values,
-                    X_val.values, y_val.values,
-                    epochs=50, batch_size=64
+                    nn_model,
+                    X_tr.values,
+                    y_tr.values,
+                    X_val.values,
+                    y_val.values,
+                    epochs=50,
+                    batch_size=64,
                 )
                 nn_metrics = evaluate_nn_model(nn_model, X_val.values, y_val.values)
                 results['neural_network'] = (nn_model, nn_metrics)
                 print(f"  Neural Network: Accuracy={nn_metrics['accuracy']:.4f}, F1={nn_metrics['f1']:.4f}")
-            else:
-                print("  TensorFlow not available, skipping neural network")
-        except Exception as e:
-            print(f"  Neural network training failed: {e}")
+            except Exception as e:
+                print(f"  Neural network training failed: {e}")
 
     # Print comparison table
     print("\n" + "=" * 60)
@@ -166,7 +175,7 @@ def main():
     else:  # none - use best model
         print(f"Using best model ({best_name}) for predictions...")
         if best_name == 'neural_network' and nn_model is not None:
-            probabilities = nn_model.predict(X_test.values, verbose=0).flatten()
+            probabilities = predict_nn_model(nn_model, X_test.values)
             predictions = (probabilities > 0.5).astype(int)
         else:
             predictions = best_model.predict(X_test)
