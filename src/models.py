@@ -1,5 +1,6 @@
 """
 Machine Learning models for loan prediction.
+贷款预测的机器学习模型。
 """
 
 import numpy as np
@@ -32,9 +33,10 @@ except ImportError:
 def get_models():
     """
     Get dictionary of all available models with default parameters.
+    获取所有可用模型及其默认参数的字典。
 
-    Returns:
-        Dictionary mapping model names to model instances
+    Returns / 返回:
+        Dictionary mapping model names to model instances / 模型名称到模型实例的字典映射
     """
     models = {
         'logistic_regression': LogisticRegression(max_iter=1000, random_state=42),
@@ -77,9 +79,10 @@ def get_models():
 def get_optimized_models():
     """
     Get dictionary of models with optimized hyperparameters.
+    获取具有优化超参数的模型字典。
 
-    Returns:
-        Dictionary mapping model names to model instances
+    Returns / 返回:
+        Dictionary mapping model names to model instances / 模型名称到模型实例的字典映射
     """
     models = {
         'logistic_regression': LogisticRegression(
@@ -145,14 +148,15 @@ def get_optimized_models():
 def train_model(model, X_train, y_train):
     """
     Train a single model.
+    训练单个模型。
 
-    Args:
-        model: Model instance
-        X_train: Training features
-        y_train: Training target
+    Args / 参数:
+        model: Model instance / 模型实例
+        X_train: Training features / 训练特征
+        y_train: Training target / 训练目标
 
-    Returns:
-        Trained model
+    Returns / 返回:
+        Trained model / 已训练的模型
     """
     model.fit(X_train, y_train)
     return model
@@ -161,17 +165,18 @@ def train_model(model, X_train, y_train):
 def evaluate_model(model, X, y, cv=5):
     """
     Evaluate model using cross-validation and various metrics.
+    使用交叉验证和各种指标评估模型。
 
-    Args:
-        model: Trained model
-        X: Features
-        y: Target
-        cv: Number of cross-validation folds
+    Args / 参数:
+        model: Trained model / 已训练的模型
+        X: Features / 特征
+        y: Target / 目标
+        cv: Number of cross-validation folds / 交叉验证折数
 
-    Returns:
-        Dictionary of evaluation metrics
+    Returns / 返回:
+        Dictionary of evaluation metrics / 评估指标字典
     """
-    # Predictions
+    # Predictions / 预测
     y_pred = model.predict(X)
     y_prob = model.predict_proba(X)[:, 1] if hasattr(model, 'predict_proba') else None
 
@@ -182,7 +187,7 @@ def evaluate_model(model, X, y, cv=5):
         'f1': f1_score(y, y_pred, average='binary', zero_division=0),
     }
 
-    # Cross-validation scores - adjust cv for small datasets
+    # Cross-validation scores - adjust cv for small datasets / 交叉验证分数 - 为小数据集调整 cv
     min_class_count = min(y.value_counts()) if hasattr(y, 'value_counts') else min(np.bincount(y.astype(int)))
     actual_cv = min(cv, min_class_count, len(y))
     if actual_cv >= 2:
@@ -206,16 +211,17 @@ def evaluate_model(model, X, y, cv=5):
 def train_and_evaluate_all(X_train, y_train, X_val=None, y_val=None, use_optimized=True):
     """
     Train and evaluate all available models.
+    训练和评估所有可用模型。
 
-    Args:
-        X_train: Training features
-        y_train: Training target
-        X_val: Validation features (optional)
-        y_val: Validation target (optional)
-        use_optimized: Whether to use optimized hyperparameters
+    Args / 参数:
+        X_train: Training features / 训练特征
+        y_train: Training target / 训练目标
+        X_val: Validation features (optional) / 验证特征（可选）
+        y_val: Validation target (optional) / 验证目标（可选）
+        use_optimized: Whether to use optimized hyperparameters / 是否使用优化的超参数
 
-    Returns:
-        Dictionary mapping model names to (model, metrics) tuples
+    Returns / 返回:
+        Dictionary mapping model names to (model, metrics) tuples / 模型名称到 (模型, 指标) 元组的字典映射
     """
     models = get_optimized_models() if use_optimized else get_models()
     results = {}
@@ -224,7 +230,7 @@ def train_and_evaluate_all(X_train, y_train, X_val=None, y_val=None, use_optimiz
         print(f"Training {name}...")
         trained_model = train_model(model, X_train, y_train)
 
-        # Evaluate on validation set if provided, else use training set
+        # Evaluate on validation set if provided, else use training set / 如果提供验证集则在验证集上评估，否则使用训练集
         eval_X = X_val if X_val is not None else X_train
         eval_y = y_val if y_val is not None else y_train
 
@@ -238,13 +244,14 @@ def train_and_evaluate_all(X_train, y_train, X_val=None, y_val=None, use_optimiz
 def get_best_model(results, metric='f1'):
     """
     Get the best performing model based on a specified metric.
+    根据指定的指标获取表现最好的模型。
 
-    Args:
-        results: Dictionary from train_and_evaluate_all
-        metric: Metric to use for comparison
+    Args / 参数:
+        results: Dictionary from train_and_evaluate_all / train_and_evaluate_all 返回的字典
+        metric: Metric to use for comparison / 用于比较的指标
 
-    Returns:
-        Tuple of (model_name, model, metrics)
+    Returns / 返回:
+        Tuple of (model_name, model, metrics) / (模型名称, 模型, 指标) 元组
     """
     best_name = None
     best_score = -np.inf
