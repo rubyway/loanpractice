@@ -45,7 +45,7 @@ def preprocess_data(train_df, test_df, target_col='loan_status'):
         target_col: Name of target column
 
     Returns:
-        Tuple of (X_train, y_train, X_test, encoders, scaler, feature_names)
+        Tuple of (X_train, y_train, X_test, encoders, scaler, test_feature_cols, test_index)
     """
     # Make copies to avoid modifying original data
     train = train_df.copy()
@@ -106,8 +106,8 @@ def preprocess_data(train_df, test_df, target_col='loan_status'):
     scaler = StandardScaler()
     num_cols_in_features = [col for col in numerical_cols if col in test_feature_cols]
     if num_cols_in_features:
-        X_train[num_cols_in_features] = scaler.fit_transform(X_train[num_cols_in_features])
-        X_test[num_cols_in_features] = scaler.transform(X_test[num_cols_in_features])
+        X_train.loc[:, num_cols_in_features] = scaler.fit_transform(X_train[num_cols_in_features])
+        X_test.loc[:, num_cols_in_features] = scaler.transform(X_test[num_cols_in_features])
 
     return X_train, y_train, X_test, encoders, scaler, test_feature_cols, test_index
 

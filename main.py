@@ -17,7 +17,7 @@ import numpy as np
 warnings.filterwarnings('ignore')
 
 # Add src to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from src.data_preprocessing import load_data, preprocess_data, get_train_val_split
 from src.models import train_and_evaluate_all, get_best_model

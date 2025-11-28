@@ -82,8 +82,8 @@ def quick_preprocess(train_df, test_df, target_col='loan_status'):
     scaler = StandardScaler()
     num_features = [col for col in num_cols if col in test_feature_cols]
     if num_features:
-        X_train[num_features] = scaler.fit_transform(X_train[num_features])
-        X_test[num_features] = scaler.transform(X_test[num_features])
+        X_train.loc[:, num_features] = scaler.fit_transform(X_train[num_features])
+        X_test.loc[:, num_features] = scaler.transform(X_test[num_features])
 
     # Get test ids
     if 'id' in test.columns:
