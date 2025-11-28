@@ -30,7 +30,11 @@ The project expects CSV files with the following columns: / 项目需要包含�
 ## Installation / 安装
 
 ```bash
-pip install -r requirements.txt
+# Install uv if you have not already / 若尚未安装 uv，请先执行
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create the environment and install dependencies / 创建虚拟环境并安装依赖
+uv sync
 ```
 
 ## Usage / 使用方法
@@ -38,13 +42,13 @@ pip install -r requirements.txt
 ### Quick Training / 快速训练
 
 ```bash
-python train.py data/train.csv data/test.csv predictions.csv
+uv run python train.py data/train.csv data/test.csv predictions.csv
 ```
 
 ### Full Training with Options / 带选项的完整训练
 
 ```bash
-python main.py --train data/train.csv --test data/test.csv --output predictions.csv
+uv run python main.py --train data/train.csv --test data/test.csv --output predictions.csv
 ```
 
 #### Options / 选项:
@@ -60,16 +64,16 @@ python main.py --train data/train.csv --test data/test.csv --output predictions.
 
 ```bash
 # Use voting ensemble (default) / 使用投票集成（默认）
-python main.py --train data/train.csv --test data/test.csv --ensemble voting
+uv run python main.py --train data/train.csv --test data/test.csv --ensemble voting
 
 # Use stacking ensemble / 使用堆叠集成
-python main.py --train data/train.csv --test data/test.csv --ensemble stacking
+uv run python main.py --train data/train.csv --test data/test.csv --ensemble stacking
 
 # Include neural network / 包含神经网络
-python main.py --train data/train.csv --test data/test.csv --use-nn
+uv run python main.py --train data/train.csv --test data/test.csv --use-nn
 
 # Use best single model / 使用最佳单一模型
-python main.py --train data/train.csv --test data/test.csv --ensemble none
+uv run python main.py --train data/train.csv --test data/test.csv --ensemble none
 ```
 
 ## Project Structure / 项目结构
@@ -85,7 +89,9 @@ loanpractice/
 │   └── ensemble.py             # Ensemble methods / 集成方法
 ├── main.py                  # Main training script / 主训练脚本
 ├── train.py                 # Quick training script / 快速训练脚本
-├── requirements.txt         # Dependencies / 依赖项
+├── pyproject.toml           # Project metadata & dependencies (uv) / 项目信息与依赖（uv）
+├── uv.lock                  # Locked dependency versions / 依赖锁定文件
+├── requirements.txt         # Legacy pointer for pip workflows / pip 兼容指引
 └── README.md
 ```
 
