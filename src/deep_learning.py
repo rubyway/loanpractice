@@ -49,11 +49,26 @@ if HAS_TORCH:
     class _TransformerBlock(nn.Module):
         """Lightweight transformer encoder block for tabular features."""
 
-        def __init__(self, d_model: int, nhead: int, ff_hidden: int, dropout: float) -> None:
+        def __init__(
+            self,
+            d_model: int,
+            nhead: int,
+            ff_hidden: int,
+            dropout: float,
+            ffn_variant: str = "double",
+        ) -> None:
             super().__init__()
             self.self_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
-            self.linear1 = nn.Linear(d_model, ff_hidden)
-            self.linear2 = nn.Linear(ff_hidden, d_model)
+            self.ffn_variant = ffn_variant
+            if ffn_variant == "gated":
+                self.linear_up = nn.Linear(d_model, ff_hidden)
+                self.linear_gate = nn.Linear(d_model, ff_hidden)
+                self.linear_down = nn.Linear(ff_hidden, d_model)
+            elif ffn_variant == "double":
+                self.linear1 = nn.Linear(d_model, ff_hidden)
+                self.linear2 = nn.Linear(ff_hidden, d_model)
+            else:
+                raise ValueError("ffn_variant must be either 'double' or 'gated'")
             self.norm1 = nn.LayerNorm(d_model)
             self.norm2 = nn.LayerNorm(d_model)
             self.dropout1 = nn.Dropout(dropout)
@@ -66,7 +81,12 @@ if HAS_TORCH:
             attn_output, _ = self.self_attn(attn_input, attn_input, attn_input, need_weights=False)
             attn_output = attn_output.transpose(0, 1)
             x = self.norm1(x + self.dropout1(attn_output))
-            ff_output = self.linear2(self.activation(self.linear1(x)))
+            if self.ffn_variant == "gated":
+                up = self.linear_up(x)
+                gate = self.activation(self.linear_gate(x))
+                ff_output = self.linear_down(up * gate)
+            else:
+                ff_output = self.linear2(self.activation(self.linear1(x)))
             return self.norm2(x + self.dropout2(ff_output))
 
 
@@ -82,17 +102,20 @@ if HAS_TORCH:
             ff_hidden: int = 128,
             head_hidden: int = 64,
             dropout: float = 0.1,
+            ffn_variant: str = "double",
         ) -> None:
             super().__init__()
             if input_dim <= 0:
                 raise ValueError("input_dim must be positive for TransformerNN")
             self.input_dim = input_dim
             self.d_model = d_model
+            self.ffn_variant = ffn_variant
             self.feature_embed = nn.Linear(1, d_model)
             self.cls_token = nn.Parameter(torch.zeros(1, 1, d_model))
             self.pos_embedding = nn.Parameter(torch.zeros(1, input_dim + 1, d_model))
             self.blocks = nn.ModuleList(
-                _TransformerBlock(d_model, nhead, ff_hidden, dropout) for _ in range(num_layers)
+                _TransformerBlock(d_model, nhead, ff_hidden, dropout, ffn_variant)
+                for _ in range(num_layers)
             )
             self.norm = nn.LayerNorm(d_model)
             self.head = nn.Sequential(
@@ -172,6 +195,7 @@ def build_transformer_nn_model(
     ff_hidden: int = 128,
     head_hidden: int = 64,
     dropout: float = 0.1,
+    ffn_variant: str = "double",
 ) -> "TransformerNN":
     """
     Build a transformer-based neural network suited for tabular data.
@@ -186,6 +210,7 @@ def build_transformer_nn_model(
         ff_hidden=ff_hidden,
         head_hidden=head_hidden,
         dropout=dropout,
+        ffn_variant=ffn_variant,
     )
 
 
