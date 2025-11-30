@@ -110,6 +110,11 @@ def preprocess_data(train_df, test_df, target_col='loan_status'):
     scaler = StandardScaler()
     num_cols_in_features = [col for col in numerical_cols if col in test_feature_cols]
     if num_cols_in_features:
+        X_train = X_train.copy()
+        X_test = X_test.copy()
+        # Ensure float dtype before scaling to avoid pandas FutureWarning / 缩放前先转为浮点以避免 FutureWarning
+        X_train.loc[:, num_cols_in_features] = X_train[num_cols_in_features].astype(np.float64)
+        X_test.loc[:, num_cols_in_features] = X_test[num_cols_in_features].astype(np.float64)
         X_train.loc[:, num_cols_in_features] = scaler.fit_transform(X_train[num_cols_in_features])
         X_test.loc[:, num_cols_in_features] = scaler.transform(X_test[num_cols_in_features])
 
