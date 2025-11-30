@@ -15,18 +15,18 @@ This project implements multiple machine learning and deep learning models to pr
 ## Data Format / 数据格式
 
 The project expects CSV files with the following columns: / 项目需要包含以下列的 CSV 文件：
-- `person_age`: Age of the person / 个人年龄
-- `person_income`: Annual income / 年收入
-- `person_home_ownership`: Home ownership status (RENT, OWN, MORTGAGE, OTHER) / 住房所有权状态（租房、自有、抵押、其他）
-- `person_emp_length`: Employment length in years / 就业年限
-- `loan_intent`: Purpose of the loan / 贷款目的
-- `loan_grade`: Loan grade (A-G) / 贷款等级（A-G）
-- `loan_amnt`: Loan amount / 贷款金额
-- `loan_int_rate`: Interest rate / 利率
-- `loan_percent_income`: Loan amount as percentage of income / 贷款金额占收入的百分比
-- `cb_person_default_on_file`: Historical default (Y/N) / 历史违约记录（是/否）
-- `cb_person_cred_hist_length`: Credit history length / 信用历史长度
-- `loan_status`: Target variable (0 = No Default, 1 = Default) / 目标变量（0 = 无违约，1 = 违约）
+- `annual_income`: Borrower annual income / 借款人年收入
+- `debt_to_income_ratio`: Debt-to-income ratio / 负债收入比
+- `credit_score`: Internal or bureau credit score / 信用评分
+- `loan_amount`: Original loan amount / 贷款金额
+- `interest_rate`: Loan interest rate / 贷款利率
+- `gender`: Gender feature / 性别特征
+- `marital_status`: Marital status / 婚姻状况
+- `education_level`: Education level / 教育程度
+- `employment_status`: Employment status / 就业状态
+- `loan_purpose`: Declared purpose of the loan / 贷款目的
+- `grade_subgrade`: Loan grade-subgrade string / 贷款等级-小等级
+- `loan_paid_back`: Target (1 = fully paid, 0 = default) / 目标变量（1=已还清，0=违约）
 
 ## Installation / 安装
 
@@ -144,7 +144,7 @@ loanpractice/
 
 The prediction script generates a CSV file with: / 预测脚本生成包含以下内容的 CSV 文件：
 - `id`: Test sample identifier / 测试样本标识符
-- `loan_status`: Predicted loan status (0 or 1) / 预测的贷款状态（0 或 1）
+- `loan_paid_back`: Predicted repayment outcome (0 or 1) / 预测的还款结果（0 或 1）
 - `probability`: Prediction probability (for main.py only) / 预测概率（仅适用于 main.py）
 
 ## License / 许可证

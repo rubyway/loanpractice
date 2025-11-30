@@ -34,7 +34,7 @@ except ImportError:
     print("LightGBM not available")
 
 
-def quick_preprocess(train_df, test_df, target_col='loan_status'):
+def quick_preprocess(train_df, test_df, target_col='loan_paid_back'):
     """
     Quick preprocessing of loan data.
     贷款数据快速预处理。
@@ -80,14 +80,17 @@ def quick_preprocess(train_df, test_df, target_col='loan_status'):
     # Get common features / 获取公共特征
     test_feature_cols = [col for col in feature_cols if col in test.columns]
 
-    X_train = train[test_feature_cols]
-    y_train = train[target_col]
-    X_test = test[test_feature_cols]
+    X_train = train[test_feature_cols].copy()
+    y_train = train[target_col].astype(int)
+    X_test = test[test_feature_cols].copy()
 
     # Scale features / 缩放特征
     scaler = StandardScaler()
     num_features = [col for col in num_cols if col in test_feature_cols]
     if num_features:
+        float_cast = {col: np.float64 for col in num_features}
+        X_train = X_train.astype(float_cast, copy=True)
+        X_test = X_test.astype(float_cast, copy=True)
         X_train.loc[:, num_features] = scaler.fit_transform(X_train[num_features])
         X_test.loc[:, num_features] = scaler.transform(X_test[num_features])
 
@@ -182,13 +185,13 @@ def train_and_predict(train_path, test_path, output_path='predictions.csv'):
     # Save predictions / 保存预测
     output = pd.DataFrame({
         'id': test_ids,
-        'loan_status': predictions
+        'loan_paid_back': predictions
     })
     output.to_csv(output_path, index=False)
 
     print(f"\nPredictions saved to {output_path}")
-    print(f"Predicted 0: {(predictions == 0).sum()}")
-    print(f"Predicted 1: {(predictions == 1).sum()}")
+    print(f"Predicted loan_paid_back=0: {(predictions == 0).sum()}")
+    print(f"Predicted loan_paid_back=1: {(predictions == 1).sum()}")
 
     return output
 

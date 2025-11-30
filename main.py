@@ -207,7 +207,7 @@ def main():
     # Save predictions
     output_df = pd.DataFrame({
         'id': test_index,
-        'loan_status': predictions,
+        'loan_paid_back': predictions,
         'probability': probabilities
     })
     output_df.to_csv(args.output, index=False)
@@ -218,8 +218,8 @@ def main():
     print("Prediction Summary")
     print("=" * 60)
     print(f"Total predictions: {len(predictions)}")
-    print(f"Predicted loan_status=0: {(predictions == 0).sum()} ({100*(predictions == 0).mean():.1f}%)")
-    print(f"Predicted loan_status=1: {(predictions == 1).sum()} ({100*(predictions == 1).mean():.1f}%)")
+    print(f"Predicted loan_paid_back=0: {(predictions == 0).sum()} ({100*(predictions == 0).mean():.1f}%)")
+    print(f"Predicted loan_paid_back=1: {(predictions == 1).sum()} ({100*(predictions == 1).mean():.1f}%)")
     print(f"Average probability: {probabilities.mean():.4f}")
 
     print("\nDone!")

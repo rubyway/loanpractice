@@ -32,7 +32,7 @@ def load_data(train_path, test_path, original_path=None):
     return train_df, test_df, original_df
 
 
-def preprocess_data(train_df, test_df, target_col='loan_status'):
+def preprocess_data(train_df, test_df, target_col='loan_paid_back'):
     """
     Preprocess the data for machine learning.
     为机器学习预处理数据。
@@ -97,7 +97,7 @@ def preprocess_data(train_df, test_df, target_col='loan_status'):
 
     # Prepare features and target / 准备特征和目标
     X_train = train[feature_cols]
-    y_train = train[target_col] if target_col in train.columns else None
+    y_train = train[target_col].astype(int) if target_col in train.columns else None
 
     # Handle test features - only use columns that exist in test / 处理测试特征 - 只使用测试集中存在的列
     test_feature_cols = [col for col in feature_cols if col in test.columns]
